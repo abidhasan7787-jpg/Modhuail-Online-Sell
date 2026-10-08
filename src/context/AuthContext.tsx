@@ -8,6 +8,9 @@ interface AuthContextType {
   isSuperAdmin: boolean;
   login: (email: string, password?: string) => { success: boolean; user?: UserProfile; error?: string };
   register: (fullName: string, email: string, phone: string, password?: string) => { success: boolean; user?: UserProfile; error?: string };
+  changePassword: (oldPassword: string, newPassword: string) => { success: boolean; error?: string };
+  resetAdminPassword: (newPassword?: string) => { success: boolean; message: string };
+  getAdminPassword: () => string;
   logout: () => void;
   updateProfile: (updates: Partial<UserProfile>) => UserProfile;
   loginAsDemoAdmin: () => void;
@@ -42,8 +45,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return auth.updateProfile(updates);
   };
 
+  const changePassword = (oldPassword: string, newPassword: string) => {
+    return auth.changePassword(oldPassword, newPassword);
+  };
+
+  const resetAdminPassword = (newPassword?: string) => {
+    return auth.resetAdminPassword(newPassword);
+  };
+
+  const getAdminPassword = () => {
+    return auth.getAdminPassword();
+  };
+
   const loginAsDemoAdmin = () => {
-    auth.login('admin@mj.com', 'admin123');
+    auth.loginAsAdminDirectly();
   };
 
   const loginAsDemoCustomer = () => {
@@ -61,6 +76,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isSuperAdmin,
         login,
         register,
+        changePassword,
+        resetAdminPassword,
+        getAdminPassword,
         logout,
         updateProfile,
         loginAsDemoAdmin,

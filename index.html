@@ -13,9 +13,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <script>
+      // GitHub Pages sub-repository trailing-slash normalization
+      (function() {
+        var p = window.location.pathname;
+        if (p && !p.endsWith('/') && !p.split('/').pop().includes('.')) {
+          window.location.replace(p + '/' + window.location.search + window.location.hash);
+        }
+      })();
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-pink-100 selection:text-pink-900">
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #ec4899, #0284c7); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.3);">
+          <span style="color: white; font-weight: 900; font-size: 22px; letter-spacing: -1px;">MJ</span>
+        </div>
+        <p style="margin-top: 16px; font-size: 13px; font-weight: 600; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">Loading MJ Atelier...</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

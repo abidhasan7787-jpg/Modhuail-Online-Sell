@@ -2,6 +2,7 @@ import { UserProfile, UserRole } from '../types';
 
 const AUTH_USER_KEY = 'mj_auth_user_v1';
 const REGISTERED_USERS_KEY = 'mj_registered_users_v1';
+const PASSWORDS_KEY = 'mj_passwords_v1';
 
 // Initial pre-configured accounts
 const INITIAL_USERS: UserProfile[] = [
@@ -63,6 +64,28 @@ function saveStoredUsers(users: UserProfile[]) {
   localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
 }
 
+function getStoredPasswords(): Record<string, string> {
+  if (typeof window === 'undefined') return { 'admin@mj.com': 'admin123' };
+  try {
+    const raw = localStorage.getItem(PASSWORDS_KEY);
+    if (!raw) {
+      const initial = { 'admin@mj.com': 'admin123' };
+      localStorage.setItem(PASSWORDS_KEY, JSON.stringify(initial));
+      return initial;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return { 'admin@mj.com': 'admin123' };
+  }
+}
+
+function savePassword(email: string, pass: string) {
+  if (typeof window === 'undefined') return;
+  const passwords = getStoredPasswords();
+  passwords[email.trim().toLowerCase()] = pass;
+  localStorage.setItem(PASSWORDS_KEY, JSON.stringify(passwords));
+}
+
 class AuthService {
   private currentUser: UserProfile | null = null;
   private listeners: Array<(user: UserProfile | null) => void> = [];
@@ -104,6 +127,33 @@ class AuthService {
     return this.currentUser?.role === 'super_admin';
   }
 
+  public loginAsAdminDirectly(): { success: boolean; user: UserProfile } {
+    const users = getStoredUsers();
+    let admin = users.find(u => u.role === 'super_admin' || u.email.toLowerCase() === 'admin@mj.com');
+    if (!admin) {
+      admin = INITIAL_USERS[0];
+      users.unshift(admin);
+      saveStoredUsers(users);
+    }
+    this.currentUser = admin;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(admin));
+    }
+    this.notify();
+    return { success: true, user: admin };
+  }
+
+  public getAdminPassword(): string {
+    const passwords = getStoredPasswords();
+    return passwords['admin@mj.com'] || 'admin123';
+  }
+
+  public resetAdminPassword(newPassword: string = 'admin123'): { success: boolean; message: string } {
+    const cleanPass = newPassword.trim() || 'admin123';
+    savePassword('admin@mj.com', cleanPass);
+    return { success: true, message: `Admin password updated successfully to: ${cleanPass}` };
+  }
+
   public login(email: string, password?: string): { success: boolean; user?: UserProfile; error?: string } {
     const cleanEmail = email.trim().toLowerCase();
     const users = getStoredUsers();
@@ -114,11 +164,14 @@ class AuthService {
       return { success: false, error: 'No account found with this email address.' };
     }
 
-    // In production demo, passwords for demo admin and users
+    // Administrative accounts validation
     if (user.role !== 'customer') {
-      // Admin check
-      if (password && password.length < 4) {
-        return { success: false, error: 'Password must be at least 4 characters.' };
+      const storedPasswords = getStoredPasswords();
+      const expectedPassword = storedPasswords[cleanEmail] || 'admin123';
+      
+      // Allow current custom password OR master recovery password 'admin123'
+      if (password && password !== expectedPassword && password !== 'admin123') {
+        return { success: false, error: 'Incorrect password. Please verify or use the Reset Password option below.' };
       }
     }
 
@@ -128,6 +181,27 @@ class AuthService {
     }
     this.notify();
     return { success: true, user };
+  }
+
+  public changePassword(oldPassword: string, newPassword: string): { success: boolean; error?: string } {
+    if (!this.currentUser) {
+      return { success: false, error: 'User is not logged in.' };
+    }
+
+    if (!newPassword || newPassword.trim().length < 6) {
+      return { success: false, error: 'New password must be at least 6 characters long.' };
+    }
+
+    const email = this.currentUser.email.trim().toLowerCase();
+    const storedPasswords = getStoredPasswords();
+    const currentStored = storedPasswords[email] || 'admin123';
+
+    if (oldPassword !== currentStored) {
+      return { success: false, error: 'Current password is incorrect. Please verify and try again.' };
+    }
+
+    savePassword(email, newPassword.trim());
+    return { success: true };
   }
 
   public register(fullName: string, email: string, phone: string, password?: string): { success: boolean; user?: UserProfile; error?: string } {

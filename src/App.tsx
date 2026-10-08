@@ -31,6 +31,8 @@ import { AdminBanners } from './components/admin/AdminBanners';
 import { AdminSettings } from './components/admin/AdminSettings';
 import { AdminActivityLogs } from './components/admin/AdminActivityLogs';
 import { QAAuditPanel } from './components/admin/QAAuditPanel';
+import { AdminLoginPage } from './components/admin/AdminLoginPage';
+import { AdminSecurity } from './components/admin/AdminSecurity';
 
 import { ShieldCheck } from 'lucide-react';
 
@@ -47,6 +49,19 @@ const MainApp: React.FC = () => {
   // Synchronize with URL hash for browser history & hard refreshes
   useEffect(() => {
     const handleHashChange = () => {
+      // Support GitHub Pages SPA 404 redirect (?p=/path)
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectParam = searchParams.get('p');
+        if (redirectParam) {
+          const cleanRoute = redirectParam.replace(/^\//, '');
+          const newUrl = window.location.pathname + '#/' + cleanRoute;
+          window.history.replaceState(null, '', newUrl);
+        }
+      } catch (e) {
+        // Ignore URL parsing errors
+      }
+
       const hash = window.location.hash.replace(/^#\/?/, '');
       if (!hash) {
         setCurrentRoute('home');
@@ -60,7 +75,11 @@ const MainApp: React.FC = () => {
 
       if (main === 'admin') {
         setCurrentRoute('admin');
-        if (param) setAdminTab(param);
+        if (param && param !== 'login') {
+          setAdminTab(param);
+        } else {
+          setAdminTab('dashboard');
+        }
       } else {
         setCurrentRoute(main);
         setRouteParam(param);
@@ -78,7 +97,9 @@ const MainApp: React.FC = () => {
     setRouteParam(param);
 
     if (route === 'admin') {
-      window.location.hash = param ? `#/admin/${param}` : `#/admin`;
+      const targetTab = param && param !== 'login' ? param : 'dashboard';
+      setAdminTab(targetTab);
+      window.location.hash = `#/admin/${targetTab}`;
     } else if (param) {
       window.location.hash = `#/${route}/${param}`;
     } else {
@@ -86,37 +107,17 @@ const MainApp: React.FC = () => {
     }
   };
 
-  // If trying to access admin without admin role
-  if (currentRoute === 'admin' && !isAdmin) {
+  // If trying to access admin without admin role or explicitly on /admin/login
+  if (currentRoute === 'admin' && (!isAdmin || routeParam === 'login')) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 shadow-xl p-8 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center font-bold">
-            !
-          </div>
-          <h2 className="text-xl font-bold font-serif text-slate-900">Admin Authentication Required</h2>
-          <p className="text-xs text-slate-500">
-            You must be logged in as an authorized MJ Administrator (e.g. Santo Admin) to enter the Admin Control Panel.
-          </p>
-          <div className="pt-2 flex flex-col gap-2">
-            <button
-              onClick={() => {
-                loginAsDemoAdmin();
-                navigateTo('admin');
-              }}
-              className="w-full py-2.5 bg-gradient-to-r from-pink-600 to-sky-600 text-white rounded-xl text-xs font-bold shadow-md"
-            >
-              Sign In as Santo Admin (Super Admin)
-            </button>
-            <button
-              onClick={() => navigateTo('home')}
-              className="w-full py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
-            >
-              Back to Customer Store
-            </button>
-          </div>
-        </div>
-      </div>
+      <AdminLoginPage
+        onSuccess={() => {
+          setCurrentRoute('admin');
+          setAdminTab('dashboard');
+          window.location.hash = '#/admin/dashboard';
+        }}
+        onNavigateHome={() => navigateTo('home')}
+      />
     );
   }
 
@@ -131,15 +132,27 @@ const MainApp: React.FC = () => {
         }}
         onNavigateHome={() => navigateTo('home')}
       >
-        {adminTab === 'dashboard' && <AdminDashboard onNavigateTab={(t) => setAdminTab(t)} />}
-        {adminTab === 'products' && <AdminProducts />}
-        {adminTab === 'orders' && <AdminOrders />}
-        {adminTab === 'categories' && <AdminCategories />}
-        {adminTab === 'coupons' && <AdminCoupons />}
-        {adminTab === 'banners' && <AdminBanners />}
-        {adminTab === 'settings' && <AdminSettings />}
-        {adminTab === 'activity' && <AdminActivityLogs />}
-        {adminTab === 'qa-audit' && <QAAuditPanel />}
+        {adminTab === 'products' ? (
+          <AdminProducts />
+        ) : adminTab === 'orders' ? (
+          <AdminOrders />
+        ) : adminTab === 'categories' ? (
+          <AdminCategories />
+        ) : adminTab === 'coupons' ? (
+          <AdminCoupons />
+        ) : adminTab === 'banners' ? (
+          <AdminBanners />
+        ) : adminTab === 'settings' ? (
+          <AdminSettings onNavigateTab={(t) => setAdminTab(t)} />
+        ) : adminTab === 'security' ? (
+          <AdminSecurity />
+        ) : adminTab === 'activity' ? (
+          <AdminActivityLogs />
+        ) : adminTab === 'qa-audit' ? (
+          <QAAuditPanel />
+        ) : (
+          <AdminDashboard onNavigateTab={(t) => setAdminTab(t)} />
+        )}
         <ToastContainer />
       </AdminLayout>
     );
@@ -175,19 +188,30 @@ const MainApp: React.FC = () => {
       {/* Global Notifications */}
       <ToastContainer />
 
-      {/* Floating QA Audit Quick-Launcher (Accessible for Evaluator) */}
-      <div className="fixed bottom-5 left-5 z-40">
+      {/* Floating Admin & QA Quick-Launchers */}
+      <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+        <button
+          onClick={() => {
+            if (!isAdmin) loginAsDemoAdmin();
+            navigateTo('admin', 'dashboard');
+          }}
+          className="group flex items-center gap-2 bg-gradient-to-r from-pink-600 to-sky-600 hover:from-pink-700 hover:to-sky-700 text-white px-3.5 py-2 rounded-full shadow-2xl border border-white/20 backdrop-blur-md text-xs font-bold transition-all hover:scale-105 active:scale-95"
+          title="Open MJ Admin Dashboard"
+        >
+          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+          <span>Admin Panel</span>
+        </button>
+
         <button
           onClick={() => {
             if (!isAdmin) loginAsDemoAdmin();
             navigateTo('admin', 'qa-audit');
           }}
-          className="group flex items-center gap-2 bg-slate-900/90 hover:bg-slate-950 text-white px-3.5 py-2 rounded-full shadow-2xl border border-slate-700 backdrop-blur-md text-xs font-bold transition-all hover:scale-105"
+          className="hidden sm:flex items-center gap-1.5 bg-slate-900/90 hover:bg-slate-950 text-white px-3 py-2 rounded-full shadow-2xl border border-slate-700 backdrop-blur-md text-xs font-bold transition-all hover:scale-105"
           title="Run Zero-Bug QA Audit"
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span className="hidden sm:inline">QA Audit Suite</span>
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <span>QA Audit</span>
         </button>
       </div>
 

@@ -4,7 +4,7 @@ import { Logo } from '../common/Logo';
 import { 
   LayoutDashboard, ShoppingBag, Layers, ShoppingCart, 
   Tag, Image, Settings, FileText, Activity, ShieldCheck, 
-  LogOut, ExternalLink, Menu, X, CheckCircle2, AlertTriangle 
+  LogOut, ExternalLink, Menu, X, CheckCircle2, AlertTriangle, KeyRound 
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -32,6 +32,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { key: 'banners', label: 'Hero Banners & CMS', icon: Image },
     { key: 'activity', label: 'Activity Logs', icon: Activity },
     { key: 'settings', label: 'Store & Shipping Settings', icon: Settings },
+    { key: 'security', label: 'Admin Password & Security', icon: KeyRound },
     { key: 'qa-audit', label: 'System QA Audit Suite', icon: ShieldCheck, highlight: true },
   ];
 
@@ -52,16 +53,23 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
 
         {/* Current Admin user tag */}
-        <div className="px-5 py-4 bg-slate-900/60 border-b border-slate-900 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-sky-500 text-white flex items-center justify-center font-bold text-xs shadow-md">
-            {user?.full_name?.charAt(0) || 'A'}
+        <div 
+          onClick={() => onTabChange('security')}
+          className="px-5 py-4 bg-slate-900/60 border-b border-slate-900 flex items-center justify-between cursor-pointer hover:bg-slate-900 transition-colors group"
+          title="Click to manage account password & security"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-sky-500 text-white flex items-center justify-center font-bold text-xs shadow-md shrink-0">
+              {user?.full_name?.charAt(0) || 'A'}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-white truncate">{user?.full_name || 'Santo Admin'}</p>
+              <p className="text-[10px] text-pink-400 font-semibold uppercase tracking-wider">
+                {user?.role?.replace('_', ' ') || 'Super Admin'}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-bold text-white truncate">{user?.full_name || 'Santo Admin'}</p>
-            <p className="text-[10px] text-pink-400 font-semibold uppercase tracking-wider">
-              {user?.role?.replace('_', ' ') || 'Super Admin'}
-            </p>
-          </div>
+          <KeyRound className="w-4 h-4 text-slate-500 group-hover:text-pink-400 transition-colors shrink-0" />
         </div>
 
         {/* Navigation links */}
@@ -181,6 +189,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => onTabChange('security')}
+              className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl border border-slate-300 flex items-center gap-1.5 transition-colors"
+              title="Change Admin Password"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-pink-600" />
+              <span>Change Password</span>
+            </button>
             <button
               onClick={() => onTabChange('qa-audit')}
               className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"

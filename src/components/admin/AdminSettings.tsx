@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../services/db';
 import { StoreSettings } from '../../types';
 import { useStore } from '../../context/StoreContext';
-import { Save, Store, Truck, CreditCard, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Save, Store, Truck, CreditCard, ShieldCheck, KeyRound, ArrowRight } from 'lucide-react';
 
-export const AdminSettings: React.FC = () => {
+export const AdminSettings: React.FC<{ onNavigateTab?: (tab: string) => void }> = ({ onNavigateTab }) => {
   const { showToast } = useStore();
+  const { user } = useAuth();
   const [settings, setSettings] = useState<StoreSettings>(db.getStoreSettings());
 
   useEffect(() => {
@@ -134,6 +136,32 @@ export const AdminSettings: React.FC = () => {
               Enable bKash / Nagad / Rocket Sandbox Gateways
             </label>
           </div>
+        </div>
+
+        {/* Admin Password & Security Quick Access */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-950 text-white rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-pink-400 font-bold text-xs uppercase tracking-wider">
+              <KeyRound className="w-4 h-4" />
+              <span>Admin Account Security</span>
+            </div>
+            <h4 className="text-sm font-bold text-white font-serif">
+              Administrator Password & Access Management
+            </h4>
+            <p className="text-slate-400 text-xs">
+              Signed in as <strong className="text-slate-200">{user?.email || 'admin@mj.com'}</strong>. Change your password or manage credentials.
+            </p>
+          </div>
+          {onNavigateTab && (
+            <button
+              type="button"
+              onClick={() => onNavigateTab('security')}
+              className="px-4 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:opacity-95 text-white font-bold rounded-xl text-xs flex items-center gap-2 shrink-0 shadow-sm"
+            >
+              <span>Change Password Now</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <button

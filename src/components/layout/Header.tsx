@@ -69,6 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
     { label: 'Bags & Accessories', route: 'shop', param: 'category=cat-accessories' },
     { label: 'Sale %', route: 'shop', param: 'filter=sale', highlight: true },
     { label: 'Story', route: 'page', param: 'about-us' },
+    { label: 'Admin Panel', route: 'admin', adminBadge: true },
   ];
 
   return (
@@ -93,9 +94,21 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-7">
+          <nav className="hidden lg:flex items-center space-x-6">
             {navLinks.map((link) => {
               const isActive = currentRoute === link.route && !link.param;
+              if (link.adminBadge) {
+                return (
+                  <button
+                    key={link.label}
+                    onClick={() => onNavigate('admin')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all hover:scale-105 active:scale-95"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Admin Panel</span>
+                  </button>
+                );
+              }
               return (
                 <button
                   key={link.label}
@@ -235,20 +248,18 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
                         </span>
                       </div>
 
-                      {isAdmin && (
-                        <div className="px-2 py-1">
-                          <button
-                            onClick={() => {
-                              onNavigate('admin');
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 rounded-xl transition-colors"
-                          >
-                            <ShieldAlert className="w-4 h-4 text-rose-500" />
-                            Admin Control Panel
-                          </button>
-                        </div>
-                      )}
+                      <div className="px-2 py-1">
+                        <button
+                          onClick={() => {
+                            onNavigate('admin');
+                            setIsAccountMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50/50 hover:bg-rose-50 rounded-xl transition-colors"
+                        >
+                          <ShieldAlert className="w-4 h-4 text-rose-500" />
+                          Admin Control Panel
+                        </button>
+                      </div>
 
                       <div className="px-2 py-1 space-y-0.5 border-t border-slate-100">
                         <button
@@ -424,17 +435,16 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
                 >
                   FAQ & Help
                 </button>
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      onNavigate('admin');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full text-left py-2 px-3 text-xs font-bold text-rose-600"
-                  >
-                    Admin Dashboard →
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    onNavigate('admin');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left py-2 px-3 text-xs font-bold text-pink-600 bg-pink-50/70 rounded-lg flex items-center justify-between"
+                >
+                  <span>Admin Control Portal</span>
+                  <span>→</span>
+                </button>
               </div>
             </div>
 

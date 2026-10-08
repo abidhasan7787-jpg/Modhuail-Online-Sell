@@ -4,7 +4,7 @@ import { Order, Product } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { 
   DollarSign, ShoppingCart, Clock, AlertTriangle, 
-  TrendingUp, Users, ArrowRight, CheckCircle2, ShieldCheck 
+  TrendingUp, Users, ArrowRight, CheckCircle2, ShieldCheck, KeyRound 
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -141,12 +141,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
           </p>
         </div>
 
-        <button
-          onClick={() => onNavigateTab('qa-audit')}
-          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md shrink-0 flex items-center gap-2"
-        >
-          Run Audit Suite <ArrowRight className="w-4 h-4" />
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => onNavigateTab('security')}
+            className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold uppercase tracking-wider border border-white/20 flex items-center gap-2 transition-colors"
+          >
+            <KeyRound className="w-4 h-4 text-pink-300" />
+            Change Password
+          </button>
+          <button
+            onClick={() => onNavigateTab('qa-audit')}
+            className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2"
+          >
+            Run Audit Suite <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Two Column Section: Recent Orders & Low Stock */}
