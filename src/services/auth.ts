@@ -4,7 +4,7 @@ const AUTH_USER_KEY = 'mj_auth_user_v1';
 const REGISTERED_USERS_KEY = 'mj_registered_users_v1';
 const PASSWORDS_KEY = 'mj_passwords_v1';
 
-// Initial pre-configured accounts
+// Official Production Admin Account only - No Demo Users
 const INITIAL_USERS: UserProfile[] = [
   {
     id: 'admin-santo-01',
@@ -14,36 +14,11 @@ const INITIAL_USERS: UserProfile[] = [
     role: 'super_admin',
     created_at: new Date('2026-01-01').toISOString(),
     updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'user-001',
-    email: 'sabrina.rahman@example.com',
-    full_name: 'Sabrina Rahman',
-    phone: '01711223344',
-    role: 'customer',
-    created_at: new Date('2026-02-15').toISOString(),
-    updated_at: new Date().toISOString(),
-    default_address: {
-      id: 'addr-001',
-      full_name: 'Sabrina Rahman',
-      phone: '01711223344',
-      division: 'Dhaka',
-      district: 'Dhaka',
-      upazila: 'Dhanmondi',
-      street_address: 'House 14/A, Road 8, Dhanmondi',
-      postal_code: '1205',
-    }
-  },
-  {
-    id: 'user-002',
-    email: 'tanvir.hossain@example.com',
-    full_name: 'Tanvir Hossain',
-    phone: '01812345678',
-    role: 'customer',
-    created_at: new Date('2026-03-01').toISOString(),
-    updated_at: new Date().toISOString(),
   }
 ];
+
+// Clean filter to ensure demo users are completely purged
+const DEMO_EMAILS = ['sabrina.rahman@example.com', 'tanvir.hossain@example.com', 'demo@example.com', 'customer@mj.com'];
 
 function getStoredUsers(): UserProfile[] {
   if (typeof window === 'undefined') return INITIAL_USERS;
@@ -53,7 +28,16 @@ function getStoredUsers(): UserProfile[] {
       localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(INITIAL_USERS));
       return INITIAL_USERS;
     }
-    return JSON.parse(raw);
+    const parsed: UserProfile[] = JSON.parse(raw);
+    // Strip demo users from local storage
+    const cleaned = parsed.filter(u => !DEMO_EMAILS.includes(u.email.toLowerCase()));
+    if (!cleaned.some(u => u.role === 'super_admin' || u.email.toLowerCase() === 'admin@mj.com')) {
+      cleaned.unshift(INITIAL_USERS[0]);
+    }
+    if (cleaned.length !== parsed.length) {
+      localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch {
     return INITIAL_USERS;
   }
@@ -61,7 +45,8 @@ function getStoredUsers(): UserProfile[] {
 
 function saveStoredUsers(users: UserProfile[]) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
+  const cleaned = users.filter(u => !DEMO_EMAILS.includes(u.email.toLowerCase()));
+  localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(cleaned));
 }
 
 function getStoredPasswords(): Record<string, string> {
@@ -95,7 +80,13 @@ class AuthService {
       try {
         const raw = localStorage.getItem(AUTH_USER_KEY);
         if (raw) {
-          this.currentUser = JSON.parse(raw);
+          const parsed = JSON.parse(raw);
+          if (DEMO_EMAILS.includes(parsed?.email?.toLowerCase())) {
+            localStorage.removeItem(AUTH_USER_KEY);
+            this.currentUser = null;
+          } else {
+            this.currentUser = parsed;
+          }
         }
       } catch (e) {
         console.error('Failed to parse active user session', e);
@@ -127,51 +118,34 @@ class AuthService {
     return this.currentUser?.role === 'super_admin';
   }
 
-  public loginAsAdminDirectly(): { success: boolean; user: UserProfile } {
-    const users = getStoredUsers();
-    let admin = users.find(u => u.role === 'super_admin' || u.email.toLowerCase() === 'admin@mj.com');
-    if (!admin) {
-      admin = INITIAL_USERS[0];
-      users.unshift(admin);
-      saveStoredUsers(users);
-    }
-    this.currentUser = admin;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(admin));
-    }
-    this.notify();
-    return { success: true, user: admin };
-  }
-
-  public getAdminPassword(): string {
-    const passwords = getStoredPasswords();
-    return passwords['admin@mj.com'] || 'admin123';
-  }
-
-  public resetAdminPassword(newPassword: string = 'admin123'): { success: boolean; message: string } {
-    const cleanPass = newPassword.trim() || 'admin123';
-    savePassword('admin@mj.com', cleanPass);
-    return { success: true, message: `Admin password updated successfully to: ${cleanPass}` };
-  }
-
+  // Strict Authentication: Correct password is strictly required! No bypass.
   public login(email: string, password?: string): { success: boolean; user?: UserProfile; error?: string } {
     const cleanEmail = email.trim().toLowerCase();
-    const users = getStoredUsers();
+    const cleanPass = password?.trim();
 
-    // Check if matching user exists
-    const user = users.find(u => u.email.toLowerCase() === cleanEmail);
-    if (!user) {
-      return { success: false, error: 'No account found with this email address.' };
+    if (!cleanPass) {
+      return { success: false, error: 'Password is required to sign in.' };
     }
 
-    // Administrative accounts validation
+    const users = getStoredUsers();
+    const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+    if (!user) {
+      return { success: false, error: 'Invalid credentials. No registered account found with this email.' };
+    }
+
+    const storedPasswords = getStoredPasswords();
+    const expectedPassword = storedPasswords[cleanEmail] || (user.role === 'super_admin' ? 'admin123' : undefined);
+
+    // Administrative accounts MUST match the exact current password
     if (user.role !== 'customer') {
-      const storedPasswords = getStoredPasswords();
-      const expectedPassword = storedPasswords[cleanEmail] || 'admin123';
-      
-      // Allow current custom password OR master recovery password 'admin123'
-      if (password && password !== expectedPassword && password !== 'admin123') {
-        return { success: false, error: 'Incorrect password. Please verify or use the Reset Password option below.' };
+      if (!expectedPassword || cleanPass !== expectedPassword) {
+        return { success: false, error: 'Incorrect password. Access denied.' };
+      }
+    } else {
+      // Customer account password check if password was set
+      if (expectedPassword && cleanPass !== expectedPassword) {
+        return { success: false, error: 'Incorrect password.' };
       }
     }
 
@@ -183,6 +157,7 @@ class AuthService {
     return { success: true, user };
   }
 
+  // Secure Password Change - Only authenticated admin with correct old password can change password
   public changePassword(oldPassword: string, newPassword: string): { success: boolean; error?: string } {
     if (!this.currentUser) {
       return { success: false, error: 'User is not logged in.' };
@@ -196,8 +171,8 @@ class AuthService {
     const storedPasswords = getStoredPasswords();
     const currentStored = storedPasswords[email] || 'admin123';
 
-    if (oldPassword !== currentStored) {
-      return { success: false, error: 'Current password is incorrect. Please verify and try again.' };
+    if (oldPassword.trim() !== currentStored) {
+      return { success: false, error: 'Current password is incorrect. Verification failed.' };
     }
 
     savePassword(email, newPassword.trim());
@@ -224,6 +199,10 @@ class AuthService {
 
     users.push(newUser);
     saveStoredUsers(users);
+
+    if (password && password.trim()) {
+      savePassword(cleanEmail, password.trim());
+    }
 
     this.currentUser = newUser;
     if (typeof window !== 'undefined') {

@@ -161,16 +161,9 @@ export const AdminSecurity: React.FC = () => {
                 {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1">
-              <span>(Default initial password was <code className="font-mono text-slate-600 font-bold">admin123</code>)</span>
-              <button
-                type="button"
-                onClick={() => setCurrentPassword('admin123')}
-                className="text-pink-600 hover:text-pink-700 font-bold"
-              >
-                Auto-fill &apos;admin123&apos;
-              </button>
-            </div>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Initial setup password was <code className="font-mono text-slate-600 font-bold">admin123</code>
+            </p>
           </div>
 
           {/* New Password */}

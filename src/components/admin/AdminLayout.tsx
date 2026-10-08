@@ -33,7 +33,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { key: 'activity', label: 'Activity Logs', icon: Activity },
     { key: 'settings', label: 'Store & Shipping Settings', icon: Settings },
     { key: 'security', label: 'Admin Password & Security', icon: KeyRound },
-    { key: 'qa-audit', label: 'System QA Audit Suite', icon: ShieldCheck, highlight: true },
   ];
 
   return (
@@ -196,12 +195,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             >
               <KeyRound className="w-3.5 h-3.5 text-pink-600" />
               <span>Change Password</span>
-            </button>
-            <button
-              onClick={() => onTabChange('qa-audit')}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-4 h-4" /> Run QA Test Audit
             </button>
             <button
               onClick={onNavigateHome}

@@ -10,7 +10,7 @@ interface AuthPagesProps {
 }
 
 export const AuthPages: React.FC<AuthPagesProps> = ({ initialMode = 'login', onNavigate }) => {
-  const { login, register, loginAsDemoAdmin, loginAsDemoCustomer } = useAuth();
+  const { login, register } = useAuth();
   const { showToast } = useStore();
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>(initialMode);
@@ -89,7 +89,7 @@ export const AuthPages: React.FC<AuthPagesProps> = ({ initialMode = 'login', onN
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="e.g. Sabrina Rahman"
+                  placeholder="e.g. Abid Hasan"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
@@ -185,37 +185,6 @@ export const AuthPages: React.FC<AuthPagesProps> = ({ initialMode = 'login', onN
               </button>
             </p>
           )}
-        </div>
-
-        {/* Quick Demo Switcher for Evaluation */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center">
-            One-Click Evaluator Login
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                loginAsDemoAdmin();
-                showToast('Signed in as Santo Admin (Super Admin)', 'success');
-                onNavigate('admin');
-              }}
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-xl text-center transition-colors"
-            >
-              Santo Admin (Admin)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                loginAsDemoCustomer();
-                showToast('Signed in as Sabrina Rahman', 'success');
-                onNavigate('account');
-              }}
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold rounded-xl text-center transition-colors"
-            >
-              Demo Customer
-            </button>
-          </div>
         </div>
 
       </div>

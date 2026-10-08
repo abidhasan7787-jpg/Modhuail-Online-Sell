@@ -186,7 +186,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({ onNavigate }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Sabrina Rahman"
+                  placeholder="e.g. Abid Hasan"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required

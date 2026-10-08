@@ -16,7 +16,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
   const { cartCount, cartSubtotal, setIsCartDrawerOpen, wishlist, compareList, formatPrice } = useStore();
-  const { user, isAdmin, logout, loginAsDemoAdmin, loginAsDemoCustomer } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -310,33 +310,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentRoute }) => {
                         >
                           Sign In / Register
                         </button>
-
-                        {/* Quick switch for evaluator QA testing */}
-                        <div className="pt-2 border-t border-slate-100">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5">
-                            Quick Switch (Demo Test)
-                          </p>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            <button
-                              onClick={() => {
-                                loginAsDemoAdmin();
-                                setIsAccountMenuOpen(false);
-                              }}
-                              className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold text-center"
-                            >
-                              Santo Admin
-                            </button>
-                            <button
-                              onClick={() => {
-                                loginAsDemoCustomer();
-                                setIsAccountMenuOpen(false);
-                              }}
-                              className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold text-center"
-                            >
-                              Customer
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </>
                   )}

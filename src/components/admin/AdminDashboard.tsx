@@ -128,16 +128,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
 
       </div>
 
-      {/* Quick Launch Action Banner */}
+      {/* Admin Quick Action Banner */}
       <div className="p-6 bg-gradient-to-r from-pink-900 via-rose-900 to-slate-900 text-white rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="space-y-1 text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-bold">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
-            Production Zero-Bug QA Engine
+            MJ Control Portal Active
           </div>
-          <h3 className="text-lg font-bold font-serif">Run Full System Automated Audit</h3>
+          <h3 className="text-lg font-bold font-serif">Store Operations & Security</h3>
           <p className="text-xs text-slate-200">
-            Validate all 24 criteria: database integrity, atomic inventory deduction, coupons, and payments.
+            Manage your catalog, fulfill customer orders, and update administrator credentials securely.
           </p>
         </div>
 
@@ -150,10 +150,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigateTab })
             Change Password
           </button>
           <button
-            onClick={() => onNavigateTab('qa-audit')}
-            className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-95 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2"
+            onClick={() => onNavigateTab('products')}
+            className="px-6 py-3 bg-gradient-to-r from-pink-500 to-sky-500 hover:opacity-95 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md flex items-center gap-2"
           >
-            Run Audit Suite <ArrowRight className="w-4 h-4" />
+            Manage Products <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

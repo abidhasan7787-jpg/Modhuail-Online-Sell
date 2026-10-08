@@ -6,15 +6,11 @@ interface AuthContextType {
   user: UserProfile | null;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  login: (email: string, password?: string) => { success: boolean; user?: UserProfile; error?: string };
+  login: (email: string, password: string) => { success: boolean; user?: UserProfile; error?: string };
   register: (fullName: string, email: string, phone: string, password?: string) => { success: boolean; user?: UserProfile; error?: string };
   changePassword: (oldPassword: string, newPassword: string) => { success: boolean; error?: string };
-  resetAdminPassword: (newPassword?: string) => { success: boolean; message: string };
-  getAdminPassword: () => string;
   logout: () => void;
   updateProfile: (updates: Partial<UserProfile>) => UserProfile;
-  loginAsDemoAdmin: () => void;
-  loginAsDemoCustomer: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, []);
 
-  const login = (email: string, password?: string) => {
+  const login = (email: string, password: string) => {
     return auth.login(email, password);
   };
 
@@ -49,22 +45,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return auth.changePassword(oldPassword, newPassword);
   };
 
-  const resetAdminPassword = (newPassword?: string) => {
-    return auth.resetAdminPassword(newPassword);
-  };
-
-  const getAdminPassword = () => {
-    return auth.getAdminPassword();
-  };
-
-  const loginAsDemoAdmin = () => {
-    auth.loginAsAdminDirectly();
-  };
-
-  const loginAsDemoCustomer = () => {
-    auth.login('sabrina.rahman@example.com');
-  };
-
   const isAdmin = user ? ['super_admin', 'admin', 'manager', 'editor', 'order_manager'].includes(user.role) : false;
   const isSuperAdmin = user?.role === 'super_admin';
 
@@ -77,12 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         changePassword,
-        resetAdminPassword,
-        getAdminPassword,
         logout,
         updateProfile,
-        loginAsDemoAdmin,
-        loginAsDemoCustomer,
       }}
     >
       {children}

@@ -30,14 +30,11 @@ import { AdminCoupons } from './components/admin/AdminCoupons';
 import { AdminBanners } from './components/admin/AdminBanners';
 import { AdminSettings } from './components/admin/AdminSettings';
 import { AdminActivityLogs } from './components/admin/AdminActivityLogs';
-import { QAAuditPanel } from './components/admin/QAAuditPanel';
 import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { AdminSecurity } from './components/admin/AdminSecurity';
 
-import { ShieldCheck } from 'lucide-react';
-
 const MainApp: React.FC = () => {
-  const { user, isAdmin, loginAsDemoAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Route State: route = 'home' | 'shop' | 'product' | 'cart' | 'checkout' | 'order-success' | 'account' | 'login' | 'register' | 'track-order' | 'wishlist' | 'page' | 'admin'
   const [currentRoute, setCurrentRoute] = useState<string>('home');
@@ -148,8 +145,6 @@ const MainApp: React.FC = () => {
           <AdminSecurity />
         ) : adminTab === 'activity' ? (
           <AdminActivityLogs />
-        ) : adminTab === 'qa-audit' ? (
-          <QAAuditPanel />
         ) : (
           <AdminDashboard onNavigateTab={(t) => setAdminTab(t)} />
         )}
@@ -188,30 +183,15 @@ const MainApp: React.FC = () => {
       {/* Global Notifications */}
       <ToastContainer />
 
-      {/* Floating Admin & QA Quick-Launchers */}
-      <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+      {/* Floating Admin Portal Launcher */}
+      <div className="fixed bottom-5 left-5 z-40">
         <button
-          onClick={() => {
-            if (!isAdmin) loginAsDemoAdmin();
-            navigateTo('admin', 'dashboard');
-          }}
+          onClick={() => navigateTo('admin', 'dashboard')}
           className="group flex items-center gap-2 bg-gradient-to-r from-pink-600 to-sky-600 hover:from-pink-700 hover:to-sky-700 text-white px-3.5 py-2 rounded-full shadow-2xl border border-white/20 backdrop-blur-md text-xs font-bold transition-all hover:scale-105 active:scale-95"
-          title="Open MJ Admin Dashboard"
+          title="Open MJ Admin Login"
         >
           <span className="w-2 h-2 rounded-full bg-white animate-ping" />
           <span>Admin Panel</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (!isAdmin) loginAsDemoAdmin();
-            navigateTo('admin', 'qa-audit');
-          }}
-          className="hidden sm:flex items-center gap-1.5 bg-slate-900/90 hover:bg-slate-950 text-white px-3 py-2 rounded-full shadow-2xl border border-slate-700 backdrop-blur-md text-xs font-bold transition-all hover:scale-105"
-          title="Run Zero-Bug QA Audit"
-        >
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>QA Audit</span>
         </button>
       </div>
 
