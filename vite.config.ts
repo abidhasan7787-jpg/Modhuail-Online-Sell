@@ -5,8 +5,20 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   // Support GitHub Actions automatic base path or relative './' for standalone hosting
-  const githubRepo = process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` : './';
-  const base = process.env.BASE_PATH || process.env.VITE_BASE || githubRepo;
+  let githubRepo = './';
+  if (process.env.GITHUB_REPOSITORY) {
+    const repoName = process.env.GITHUB_REPOSITORY.split('/')[1] || '';
+    if (repoName.endsWith('.github.io')) {
+      githubRepo = '/';
+    } else if (repoName) {
+      githubRepo = `/${repoName}/`;
+    }
+  }
+
+  let base = process.env.BASE_PATH || process.env.VITE_BASE || githubRepo;
+  if (base && !base.endsWith('/') && !base.startsWith('./')) {
+    base = base + '/';
+  }
 
   return {
     base,
