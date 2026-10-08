@@ -1,0 +1,6 @@
+{
+  "name": "MJ — Fashion & Lifestyle eCommerce",
+  "description": "Production-grade fashion eCommerce store MJ featuring luxury apparel, size & color variations, real-time inventory, secure checkout with COD & mobile banking, and full admin management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
